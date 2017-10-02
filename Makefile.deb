@@ -1,0 +1,24 @@
+APP_REPO := github.com/0xef53/foreman
+
+.PHONY: all deb fetch
+
+all: deb
+
+deb: fetch
+	$(eval VERSION = $(shell grep '\sVersion' src/$(APP_REPO)/common.go | cut -d'=' -f2 | xargs -rn1 echo))
+	$(eval COMMIT_REV = $(shell cd src/$(APP_REPO) && git show -s --format=%h))
+	dch --create --package foreman -D unstable -v $(VERSION)-$(COMMIT_REV) 'built from: $(APP_REPO)'
+	cp src/$(APP_REPO)/README.md debian/README.debian
+	cp src/$(APP_REPO)/systemd/foreman.service debian/foreman.service
+	dpkg-buildpackage -us -uc
+
+fetch:
+	install -d src/$(APP_REPO)
+	git clone https://github.com/0xef53/foreman.git src/$(APP_REPO)
+
+clean:
+	dh_clean
+	debian/rules clean
+	rm -f debian/changelog
+	rm -f debian/README.debian
+	rm -f debian/foreman.service

@@ -1,0 +1,11 @@
+Source: foreman
+Section: admin
+Priority: optional
+Maintainer: Sergey Zhuravlev <sergey@netangels.ru>
+Build-Depends: cdbs, debhelper (>= 7), dh-systemd, git
+Standards-Version: 3.9.4
+
+Package: foreman
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: An NSQ job manager and runner

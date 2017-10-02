@@ -1,0 +1,38 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+#DH_VERBOSE = 1
+
+# see EXAMPLES in dpkg-buildflags(1) and read /usr/share/dpkg/*
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/default.mk
+
+# see FEATURE AREAS in dpkg-buildflags(1)
+#export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+# see ENVIRONMENT in dpkg-buildflags(1)
+# package maintainers to append CFLAGS
+#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
+# package maintainers to append LDFLAGS
+#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+# main packaging script based on dh7 syntax
+
+export APP_REPO = github.com/0xef53/foreman
+export GOPATH = $(PWD)
+
+.PHONY: build get clean
+
+%:
+	dh $@ --with systemd
+
+build: get
+	@echo "Building foreman package"
+	$(eval COMMIT_REV = $(shell cd src/$(APP_REPO) && git show -s --format=%h))
+	go install -v -tags netgo -ldflags '-s -w -X main.CommitRevision=$(COMMIT_REV)' $(APP_REPO)
+
+get:
+	go get -d -v $(APP_REPO)
+
+clean:
+	rm -Rf $(GOPATH)/bin $(GOPATH)/pkg $(GOPATH)/src
